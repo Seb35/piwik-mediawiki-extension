@@ -25,6 +25,16 @@ class MatomoHooks {
 	}
 
 	/**
+	 * Add the “Matomo privacy panel” extension tag.
+	 *
+	 * @param Parser $parser Parser object provided by MediaWiki.
+	 * @return void
+	 */
+	public static function onParserFirstCallInit( Parser $parser ) {
+		$parser->setHook( 'matomoPrivacyPanel', 'MatomoHooks::renderMatomoPrivacyPanel' );
+	}
+
+	/**
 	 * Get parameter with either the new prefix $wgMatomo or the old $wgPiwik.
 	 *
 	 * @param string $name Parameter name without any prefix.
@@ -217,5 +227,35 @@ MATOMO;
 		return $script;
 		
 	}
-	
+
+	/**
+	 * Markup for the “Matomo Privacy Panel”.
+	 *
+	 * @param string|null $input
+	 * @param array $args
+	 * @param Parser $parser
+	 * @param PPFrame $frame
+	 * @return string
+	 */
+	static function renderMatomoPrivacyPanel( $input, array $args, Parser $parser, PPFrame $frame ) {
+		global $wgContLang, $wgRequest;
+
+		# Whitelist of attributes
+		foreach( $args as $name => $value ) {
+			if( !in_array( $name, [ 'id', 'class', 'style' ] ) ) {
+				unset( $args[$name] );
+			}
+		}
+
+		# Construct Matomo URL
+		try {
+			$lang = $parser->getTargetLanguage()->getCode();
+		} catch( MWException $e ) {
+			$lang = $wgContLang->getCode();
+		}
+		$protocol = $wgRequest->getProtocol();
+		$args['src'] = $protocol . '://' . self::getParameter( 'URL' ) . '/index.php?module=CoreAdminHome&action=optOut&language=' . $lang;
+
+		return Html::element( 'iframe', $args );
+	}
 }

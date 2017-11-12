@@ -37,6 +37,9 @@
 		],
 		"SpecialSearchSetupEngine": [
 			"MatomoHooks::onSpecialSearchSetupEngine"
+		],
+		"ParserFirstCallInit": [
+			"MatomoHooks::onParserFirstCallInit"
 		]
 	},
 	"AutoloadClasses": {
